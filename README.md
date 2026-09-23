@@ -1,6 +1,6 @@
 # Audible Pulse Stream Engine
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Interactive_Sandbox-10B981?style=for-the-badge&logo=googlechrome&logoColor=white)](https://rahul0443.github.io/audible-pulse-stream-engine/)
+[![Interactive Demo](https://img.shields.io/badge/Interactive_Demo-Client_Side_Simulation-F59E0B?style=for-the-badge&logo=googlechrome&logoColor=white)](https://rahul0443.github.io/audible-pulse-stream-engine/)
 [![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-GitHub_Actions_Passing-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/rahul0443/audible-pulse-stream-engine/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
@@ -8,14 +8,14 @@
 [![Redis](https://img.shields.io/badge/Redis-7.0-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-Live Interactive Control Plane: [https://rahul0443.github.io/audible-pulse-stream-engine/](https://rahul0443.github.io/audible-pulse-stream-engine/)
+Interactive Demo (client-side simulation of the logic below): [https://rahul0443.github.io/audible-pulse-stream-engine/](https://rahul0443.github.io/audible-pulse-stream-engine/). The backend itself isn't deployed publicly -- its Postgres + Redis dependency doesn't fit a free hosting tier -- but it's fully covered by the Jest suite and runnable locally via the Docker Compose setup below.
 
 An enterprise-grade, high-throughput Audio Telemetry and Stream Entitlement Microservice built for scale. Designed to solve core distributed system challenges in digital streaming platforms: atomic idempotency locks during network retries, distributed sliding-window rate limiting, and real-time playback telemetry stream ingestion.
 
 ---
 
 ## Table of Contents
-- [Live Web Interactive Sandbox](#live-web-interactive-sandbox)
+- [Interactive Client-Side Demo](#interactive-client-side-demo)
 - [System Architecture and Flowcharts](#system-architecture-and-flowcharts)
 - [Idempotency and Entitlement Sequence Diagram](#idempotency-and-entitlement-sequence-diagram)
 - [Entity-Relationship (ER) Database Diagram](#entity-relationship-er-database-diagram)
@@ -29,14 +29,16 @@ An enterprise-grade, high-throughput Audio Telemetry and Stream Entitlement Micr
 
 ---
 
-## Live Web Interactive Sandbox
+## Interactive Client-Side Demo
 
-Try out the live control plane directly in your browser:  
-[Launch Live Control Sandbox](https://rahul0443.github.io/audible-pulse-stream-engine/)
+Try the request-handling logic directly in your browser -- this reimplements the sliding-window and idempotency-lock algorithms in JavaScript so there's nothing to spin up, but it doesn't call the real Express service:
+[Launch Interactive Demo](https://rahul0443.github.io/audible-pulse-stream-engine/)
 
 * Idempotency Simulator: Verify double-billing prevention when duplicate `x-idempotency-key` calls occur.
 * Rate Limiter Burst Simulator: Test Redis sliding window throttling with 50+ request bursts returning HTTP 429 Too Many Requests.
-* Telemetry Inspector: Stream real-time playback events (HEARTBEAT, BUFFERING, QUALITY_SHIFT) with live Prometheus chart updates.
+* Telemetry Inspector: Illustrates real-time playback event (HEARTBEAT, BUFFERING, QUALITY_SHIFT) flow with an example Prometheus chart.
+
+To exercise the real backend, run it locally via Docker Compose (below) and hit the actual endpoints with curl or the Jest suite.
 
 ---
 
@@ -246,7 +248,7 @@ Content-Type: application/json
 
 ### Prerequisites
 * Docker & Docker Compose
-* Node.js 20+
+* Node.js 22+
 
 ### Setup via Docker Compose
 
