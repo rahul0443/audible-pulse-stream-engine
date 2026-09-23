@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audible Pulse | Distributed Stream & Rate Limiting Engine</title>
+  <meta name="description" content="Live Interactive Sandbox & Control Plane for Distributed Audio Telemetry, Idempotency Locks, and Redis Sliding Window Rate Limiting.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-dark: #070B14;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(56, 189, 248, 0.3);
+      --accent-cyan: #38BDF8;
+      --accent-indigo: #818CF8;
+      --accent-emerald: #10B981;
+      --accent-rose: #F43F5E;
+      --accent-amber: #F59E0B;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --font-main: 'Outfit', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.5;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(129, 140, 248, 0.08) 0%, transparent 45%);
+      min-height: 100vh;
+    }
+
+    /* Header & Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(7, 11, 20, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .badge-live {
+      color: var(--accent-emerald);
+      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Layout Containers */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Hero Section */
+    .hero-banner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-text h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #FFF, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-text p {
+      color: var(--text-muted);
+      max-width: 750px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .github-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+      color: #000;
+      font-weight: 700;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+    }
+
+    .github-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Grid Layout for Simulator */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .hero-banner { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-highlight);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title-icon {
+      color: var(--accent-cyan);
+    }
+
+    /* Interactive Form Controls */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-input, .form-select {
+      background: rgba(7, 11, 20, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text-main);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #070B14;
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: var(--accent-rose);
+      color: #FFF;
+    }
+
+    .btn-danger:hover {
+      background: #fb7185;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Live Output Monitor */
+    .terminal-box {
+      background: #04060A;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      max-height: 240px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .terminal-line {
+      display: flex;
+      gap: 0.75rem;
+      word-break: break-all;
+    }
+
+    .log-time { color: var(--text-muted); }
+    .log-status-200 { color: var(--accent-emerald); font-weight: 600; }
+    .log-status-429 { color: var(--accent-rose); font-weight: 600; }
+    .log-status-201 { color: var(--accent-cyan); font-weight: 600; }
+    .log-msg { color: #E2E8F0; }
+
+    /* Meter Bar */
+    .meter-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .meter-bar-bg {
+      height: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .meter-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+      border-radius: 999px;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .meter-bar-fill.overflow {
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-rose));
+    }
+
+    /* Architecture Visualizer */
+    .arch-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      background: rgba(7, 11, 20, 0.4);
+      border-radius: 12px;
+      border: 1px dashed var(--border-color);
+    }
+
+    .arch-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .arch-node.active {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+      transform: scale(1.05);
+    }
+
+    .arch-arrow {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Metrics Summary Cards */
+    .metrics-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .metrics-summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🎧</div>
+      <div>
+        <div class="brand-title">Audible Pulse Stream Engine</div>
+        <div class="brand-subtitle">Distributed Stream Licensing & Rate Limiting System</div>
+      </div>
+    </div>
+    <div class="nav-badges">
+      <div class="badge badge-live">Live Engine Sandbox</div>
+      <a href="https://github.com/rahul0443/audible-pulse-stream-engine" target="_blank" class="github-link-btn">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub Repository
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="hero-text">
+        <h1>High-Throughput Audio Telemetry & Entitlement Gateway</h1>
+        <p>
+          Demonstrating enterprise distributed system design patterns: Redis sliding-window rate limiting, HTTP idempotency key locks, real-time playback telemetry stream processing, and Prometheus observability metrics.
+        </p>
+      </div>
+      <div class="badge" style="padding: 0.75rem 1.25rem; font-size: 0.85rem; border-color: var(--accent-cyan);">
+        ⚡ Latency: &lt;12ms p99
+      </div>
+    </div>
+
+    <!-- Live Telemetry KPI Metrics Cards -->
+    <div class="metrics-summary-grid">
+      <div class="stat-box">
+        <div class="stat-number" id="stat-req-total" style="color: var(--accent-cyan);">1,428</div>
+        <div class="stat-label">Total Requests Evaluated</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="stat-licenses" style="color: var(--accent-emerald);">384</div>
+        <div class="stat-label">Licenses Granted</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="stat-rate-blocked" style="color: var(--accent-rose);">12</div>
+        <div class="stat-label">Rate Limits Blocked (429)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="stat-idempotent-replays" style="color: var(--accent-indigo);">45</div>
+        <div class="stat-label">Idempotent Replays</div>
+      </div>
+    </div>
+
+    <!-- Interactive Topology Diagram -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">🌐</span> Interactive System Node Topology
+        </div>
+        <div class="badge" style="color: var(--accent-cyan);">Real-Time Data Pipeline</div>
+      </div>
+      <div class="arch-container">
+        <div class="arch-node" id="node-client">
+          <div>📱 Client SDK</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted);">Audio Player</div>
+        </div>
+        <div class="arch-arrow">➔</div>
+        <div class="arch-node" id="node-gateway">
+          <div>🛡️ API Gateway</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted);">Express / Helmet</div>
+        </div>
+        <div class="arch-arrow">➔</div>
+        <div class="arch-node" id="node-ratelimit">
+          <div>⚡ Redis Sliding Window</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted);">Rate Limiter</div>
+        </div>
+        <div class="arch-arrow">➔</div>
+        <div class="arch-node" id="node-service">
+          <div>⚙️ Entitlement Svc</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted);">Idempotency Lock</div>
+        </div>
+        <div class="arch-arrow">➔</div>
+        <div class="arch-node" id="node-db">
+          <div>🛢️ PostgreSQL</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted);">Prisma ORM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Main Interactive Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Module 1: Idempotent Stream Licensing Sandbox -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">🔐</span> Idempotent Stream License Granting
+          </div>
+          <span class="badge" style="color: var(--accent-emerald);">POST /api/v1/licenses/grant</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Tests double-billing prevention using header-driven <code>x-idempotency-key</code> locks. Repeated calls return cached responses without re-executing state mutations.
+        </p>
+        <div class="form-group">
+          <label class="form-label">User Subscription Tier</label>
+          <select class="form-select" id="user-tier">
+            <option value="PREMIUM">PREMIUM (Unlimited Access)</option>
+            <option value="BASIC">BASIC (Standard Rate)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Audiobook ID</label>
+          <input type="text" class="form-input" id="audiobook-id" value="ab_audible_project_hail_mary">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Idempotency Key</label>
+          <input type="text" class="form-input" id="idempotency-key" value="idem_key_998877665544">
+        </div>
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="simulateLicenseGrant(false)">Grant License</button>
+          <button class="btn btn-secondary" onclick="simulateLicenseGrant(true)">Simulate Retry (Same Key)</button>
+        </div>
+      </div>
+
+      <!-- Module 2: Redis Sliding Window Rate Limiter Simulator -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">⚡</span> Redis Sliding Window Rate Limiter
+          </div>
+          <span class="badge" style="color: var(--accent-rose);">Quota: 100 reqs / 60s</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Simulates atomic Redis Sorted Set evaluation. Fire high-velocity request bursts to observe sliding window quota enforcement and <code>HTTP 429</code> throttling.
+        </p>
+        
+        <div class="meter-container">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+            <span>Sliding Window Bucket Usage</span>
+            <span id="meter-text">24 / 100 Reqs</span>
+          </div>
+          <div class="meter-bar-bg">
+            <div class="meter-bar-fill" id="meter-fill" style="width: 24%;"></div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="fireSingleRequest()">Fire Single Request</button>
+          <button class="btn btn-danger" onclick="fireRequestBurst(30)">Fire Request Burst (30 reqs)</button>
+          <button class="btn btn-secondary" onclick="resetRateLimiter()">Reset Bucket</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Execution & Telemetry Terminal Logs -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">💻</span> Real-Time System Event Log & Telemetry Monitor
+        </div>
+        <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="clearLogs()">Clear Console</button>
+      </div>
+      <div class="terminal-box" id="terminal">
+        <div class="terminal-line">
+          <span class="log-time">[SYSTEM READY]</span>
+          <span class="log-status-200">INIT</span>
+          <span class="log-msg">Audible Pulse Stream Engine initialized with Redis Sliding Window & Prisma PostgreSQL ORM adapter.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Chart.js Metrics -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">📊</span> Prometheus Live Metrics Telemetry Chart
+        </div>
+        <span class="badge" style="color: var(--accent-cyan);">GET /metrics</span>
+      </div>
+      <div style="height: 260px;">
+        <canvas id="metricsChart"></canvas>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let reqCount = 24;
+    const maxReqs = 100;
+    let totalEvaluated = 1428;
+    let totalLicenses = 384;
+    let totalRateBlocked = 12;
+    let totalIdempotentReplays = 45;
+
+    // Terminal Logging
+    function logEvent(status, code, message) {
+      const terminal = document.getElementById('terminal');
+      const timeStr = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      line.innerHTML = `
+        <span class="log-time">[${timeStr}]</span>
+        <span class="log-status-${code}">${status} ${code}</span>
+        <span class="log-msg">${message}</span>
+      `;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+      highlightArchitectureNodes();
+    }
+
+    function clearLogs() {
+      document.getElementById('terminal').innerHTML = '';
+    }
+
+    function highlightArchitectureNodes() {
+      const nodes = ['node-client', 'node-gateway', 'node-ratelimit', 'node-service', 'node-db'];
+      nodes.forEach((id, idx) => {
+        setTimeout(() => {
+          document.getElementById(id).classList.add('active');
+          setTimeout(() => document.getElementById(id).classList.remove('active'), 400);
+        }, idx * 100);
+      });
+    }
+
+    // License Simulation
+    function simulateLicenseGrant(isRetry) {
+      totalEvaluated++;
+      const userTier = document.getElementById('user-tier').value;
+      const audiobookId = document.getElementById('audiobook-id').value;
+      const key = document.getElementById('idempotency-key').value;
+
+      if (isRetry) {
+        totalIdempotentReplays++;
+        logEvent('IDEMPOTENT_REPLAY', '200', `License for ${audiobookId} returned from cache (Key: ${key}). No double-billing executed.`);
+      } else {
+        totalLicenses++;
+        logEvent('CREATED', '201', `Granted active 24h audio stream license for ${audiobookId} (Tier: ${userTier}, Key: ${key}).`);
+      }
+      updateStats();
+    }
+
+    // Rate Limiter Simulation
+    function updateMeter() {
+      const pct = Math.min(100, (reqCount / maxReqs) * 100);
+      const fill = document.getElementById('meter-fill');
+      const text = document.getElementById('meter-text');
+      fill.style.width = pct + '%';
+      text.innerText = `${reqCount} / ${maxReqs} Reqs`;
+
+      if (reqCount >= maxReqs) {
+        fill.classList.add('overflow');
+      } else {
+        fill.classList.remove('overflow');
+      }
+    }
+
+    function fireSingleRequest() {
+      totalEvaluated++;
+      if (reqCount >= maxReqs) {
+        totalRateBlocked++;
+        logEvent('TOO_MANY_REQUESTS', '429', 'Sliding Window Rate Limit Exceeded (100 reqs/60s). Request throttled.');
+      } else {
+        reqCount++;
+        logEvent('OK', '200', `Evaluated request against Redis sliding window. Current count: ${reqCount}/${maxReqs}.`);
+      }
+      updateMeter();
+      updateStats();
+    }
+
+    function fireRequestBurst(amount) {
+      for (let i = 0; i < amount; i++) {
+        setTimeout(() => fireSingleRequest(), i * 40);
+      }
+    }
+
+    function resetRateLimiter() {
+      reqCount = 0;
+      updateMeter();
+      logEvent('RESET', '200', 'Redis rate limiter sorted set cleared.');
+    }
+
+    function updateStats() {
+      document.getElementById('stat-req-total').innerText = totalEvaluated.toLocaleString();
+      document.getElementById('stat-licenses').innerText = totalLicenses.toLocaleString();
+      document.getElementById('stat-rate-blocked').innerText = totalRateBlocked.toLocaleString();
+      document.getElementById('stat-idempotent-replays').innerText = totalIdempotentReplays.toLocaleString();
+    }
+
+    // Initialize Chart.js
+    const ctx = document.getElementById('metricsChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['00:00', '00:05', '00:10', '00:15', '00:20', '00:25', '00:30'],
+        datasets: [
+          {
+            label: 'Throughput (req/sec)',
+            data: [120, 190, 310, 240, 420, 380, 510],
+            borderColor: '#38BDF8',
+            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+            fill: true,
+            tension: 0.4
+          },
+          {
+            label: 'p99 Latency (ms)',
+            data: [12, 14, 11, 15, 12, 10, 11],
+            borderColor: '#10B981',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#94A3B8', font: { family: 'Outfit' } } }
+        },
+        scales: {
+          x: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+          y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+        }
+      }
+    });
+
+    updateMeter();
+  </script>
+</body>
+</html>
