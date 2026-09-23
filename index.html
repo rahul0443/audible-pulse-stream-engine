@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audible Pulse | Distributed Stream & Rate Limiting Engine</title>
-  <meta name="description" content="Live Interactive Sandbox & Control Plane for Distributed Audio Telemetry, Idempotency Locks, and Redis Sliding Window Rate Limiting.">
+  <meta name="description" content="Interactive client-side simulation of Distributed Audio Telemetry, Idempotency Locks, and Redis Sliding Window Rate Limiting algorithms. The real Express/Postgres/Redis backend runs in CI and Docker -- see the repo.">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -210,7 +210,7 @@
       </div>
     </div>
     <div class="nav-badges">
-      <div class="badge badge-live">Live Engine Sandbox</div>
+      <div class="badge" style="color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1);">Client-Side Simulation</div>
       <a href="https://github.com/rahul0443/audible-pulse-stream-engine" target="_blank" class="github-link-btn">
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
         GitHub Repository
@@ -228,26 +228,30 @@
         </p>
       </div>
       <div class="badge" style="padding: 0.75rem 1.25rem; font-size: 0.85rem; border-color: var(--accent-cyan);">
-        Latency: &lt;12ms p99
+        Latency: &lt;12ms p99 (measured in CI, see README)
       </div>
+    </div>
+
+    <div class="badge" style="display: block; padding: 0.85rem 1.1rem; font-size: 0.8rem; line-height: 1.5; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.08); color: var(--text-muted);">
+      <strong style="color: var(--accent-amber);">This panel is a client-side simulation</strong> that reproduces the real backend's sliding-window and idempotency-lock logic in the browser, so you can try it with nothing to spin up. The actual Express + PostgreSQL (Prisma) + Redis service lives in this repo, is covered by the Jest test suite, and builds/runs via the included Dockerfile -- it isn't deployed to a public URL, since a always-on Postgres+Redis host isn't available on free hosting tiers. All counters below start at zero and only reflect what you trigger in this browser tab.
     </div>
 
     <div class="metrics-summary-grid">
       <div class="stat-box">
-        <div class="stat-number" id="stat-req-total" style="color: var(--accent-cyan);">1,428</div>
-        <div class="stat-label">Total Requests Evaluated</div>
+        <div class="stat-number" id="stat-req-total" style="color: var(--accent-cyan);">0</div>
+        <div class="stat-label">Requests Evaluated This Session</div>
       </div>
       <div class="stat-box">
-        <div class="stat-number" id="stat-licenses" style="color: var(--accent-emerald);">384</div>
-        <div class="stat-label">Licenses Granted</div>
+        <div class="stat-number" id="stat-licenses" style="color: var(--accent-emerald);">0</div>
+        <div class="stat-label">Licenses Granted This Session</div>
       </div>
       <div class="stat-box">
-        <div class="stat-number" id="stat-rate-blocked" style="color: var(--accent-rose);">12</div>
-        <div class="stat-label">Rate Limits Blocked (429)</div>
+        <div class="stat-number" id="stat-rate-blocked" style="color: var(--accent-rose);">0</div>
+        <div class="stat-label">Rate Limits Blocked (429) This Session</div>
       </div>
       <div class="stat-box">
-        <div class="stat-number" id="stat-idempotent-replays" style="color: var(--accent-indigo);">45</div>
-        <div class="stat-label">Idempotent Replays</div>
+        <div class="stat-number" id="stat-idempotent-replays" style="color: var(--accent-indigo);">0</div>
+        <div class="stat-label">Idempotent Replays This Session</div>
       </div>
     </div>
 
@@ -289,7 +293,7 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title">Idempotent Stream License Granting</div>
-          <span class="badge" style="color: var(--accent-emerald);">POST /api/v1/licenses/grant</span>
+          <span class="badge" style="color: var(--accent-emerald);">simulates POST /api/v1/licenses/grant</span>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-muted);">
           Tests double-billing prevention using header-driven <code>x-idempotency-key</code> locks. Repeated calls return cached responses without re-executing state mutations.
@@ -327,10 +331,10 @@
         <div class="meter-container">
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
             <span>Sliding Window Bucket Usage</span>
-            <span id="meter-text">24 / 100 Reqs</span>
+            <span id="meter-text">0 / 100 Reqs</span>
           </div>
           <div class="meter-bar-bg">
-            <div class="meter-bar-fill" id="meter-fill" style="width: 24%;"></div>
+            <div class="meter-bar-fill" id="meter-fill" style="width: 0%;"></div>
           </div>
         </div>
 
@@ -359,8 +363,8 @@
 
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Prometheus Live Metrics Telemetry Chart</div>
-        <span class="badge" style="color: var(--accent-cyan);">GET /metrics</span>
+        <div class="card-title">Simulated Prometheus Metrics Chart</div>
+        <span class="badge" style="color: var(--accent-cyan);">reference: GET /metrics (real backend)</span>
       </div>
       <div style="height: 260px;">
         <canvas id="metricsChart"></canvas>
@@ -370,12 +374,12 @@
   </main>
 
   <script>
-    let reqCount = 24;
+    let reqCount = 0;
     const maxReqs = 100;
-    let totalEvaluated = 1428;
-    let totalLicenses = 384;
-    let totalRateBlocked = 12;
-    let totalIdempotentReplays = 45;
+    let totalEvaluated = 0;
+    let totalLicenses = 0;
+    let totalRateBlocked = 0;
+    let totalIdempotentReplays = 0;
 
     function logEvent(status, code, message) {
       const terminal = document.getElementById('terminal');
