@@ -1,4 +1,4 @@
-# 🎧 Audible Pulse Stream Engine
+# Audible Pulse Stream Engine
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Interactive_Sandbox-10B981?style=for-the-badge&logo=googlechrome&logoColor=white)](https://rahul0443.github.io/audible-pulse-stream-engine/)
 [![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-GitHub_Actions_Passing-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/rahul0443/audible-pulse-stream-engine/actions)
@@ -8,39 +8,39 @@
 [![Redis](https://img.shields.io/badge/Redis-7.0-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-> **Live Web Interactive Control Plane:** [https://rahul0443.github.io/audible-pulse-stream-engine/](https://rahul0443.github.io/audible-pulse-stream-engine/)
+Live Interactive Control Plane: [https://rahul0443.github.io/audible-pulse-stream-engine/](https://rahul0443.github.io/audible-pulse-stream-engine/)
 
-An enterprise-grade, high-throughput **Audio Telemetry & Stream Entitlement Microservice** built for scale. Designed specifically to solve core distributed system challenges in digital streaming platforms: **atomic idempotency locks** during network retries, **distributed sliding-window rate limiting**, and **real-time playback telemetry stream ingestion**.
-
----
-
-## 📋 Table of Contents
-- [🌐 Live Web Interactive Sandbox](#-live-web-interactive-sandbox)
-- [🏗️ System Architecture & Flowcharts](#️-system-architecture--flowcharts)
-- [🔄 Idempotency & Entitlement Sequence Diagram](#-idempotency--entitlement-sequence-diagram)
-- [🛢️ Entity-Relationship (ER) Database Diagram](#️-entity-relationship-er-database-diagram)
-- [✨ Key Engineering Features](#-key-engineering-features)
-- [📡 API Reference & JSON Payloads](#-api-reference--json-payloads)
-- [📐 Architectural Trade-Off Analysis](#-architectural-trade-off-analysis)
-- [📊 Observability & Operational Excellence](#-observability--operational-excellence)
-- [🛠️ Local Installation & Docker Setup](#️-local-installation--docker-setup)
-- [🧪 Automated Test Suite](#-automated-test-suite)
-- [📄 License & Author](#-license--author)
+An enterprise-grade, high-throughput Audio Telemetry and Stream Entitlement Microservice built for scale. Designed to solve core distributed system challenges in digital streaming platforms: atomic idempotency locks during network retries, distributed sliding-window rate limiting, and real-time playback telemetry stream ingestion.
 
 ---
 
-## 🌐 Live Web Interactive Sandbox
-
-Try out the live control plane directly in your browser without installing anything:
-👉 **[Launch Live Control Sandbox](https://rahul0443.github.io/audible-pulse-stream-engine/)**
-
-* **Idempotency Simulator:** Verify double-billing prevention when duplicate `x-idempotency-key` calls occur.
-* **Rate Limiter Burst Simulator:** Test Redis sliding window throttling with 50+ request bursts returning `429 Too Many Requests`.
-* **Telemetry Inspector:** Stream real-time playback events (HEARTBEAT, BUFFERING, QUALITY_SHIFT) with live Prometheus chart updates.
+## Table of Contents
+- [Live Web Interactive Sandbox](#live-web-interactive-sandbox)
+- [System Architecture and Flowcharts](#system-architecture-and-flowcharts)
+- [Idempotency and Entitlement Sequence Diagram](#idempotency-and-entitlement-sequence-diagram)
+- [Entity-Relationship (ER) Database Diagram](#entity-relationship-er-database-diagram)
+- [Key Engineering Features](#key-engineering-features)
+- [API Reference and JSON Payloads](#api-reference-and-json-payloads)
+- [Architectural Trade-Off Analysis](#architectural-trade-off-analysis)
+- [Observability and Operational Excellence](#observability-and-operational-excellence)
+- [Local Installation and Docker Setup](#local-installation-and-docker-setup)
+- [Automated Test Suite](#automated-test-suite)
+- [License and Author](#license-and-author)
 
 ---
 
-## 🏗️ System Architecture & Flowcharts
+## Live Web Interactive Sandbox
+
+Try out the live control plane directly in your browser:  
+[Launch Live Control Sandbox](https://rahul0443.github.io/audible-pulse-stream-engine/)
+
+* Idempotency Simulator: Verify double-billing prevention when duplicate `x-idempotency-key` calls occur.
+* Rate Limiter Burst Simulator: Test Redis sliding window throttling with 50+ request bursts returning HTTP 429 Too Many Requests.
+* Telemetry Inspector: Stream real-time playback events (HEARTBEAT, BUFFERING, QUALITY_SHIFT) with live Prometheus chart updates.
+
+---
+
+## System Architecture and Flowcharts
 
 The system uses a layered clean architecture separating API Gateway logic, security middleware, business services, and database persistence.
 
@@ -85,7 +85,7 @@ flowchart TD
 
 ---
 
-## 🔄 Idempotency & Entitlement Sequence Diagram
+## Idempotency and Entitlement Sequence Diagram
 
 This diagram illustrates how duplicate requests containing the same `x-idempotency-key` are handled without double execution:
 
@@ -117,7 +117,7 @@ sequenceDiagram
 
 ---
 
-## 🛢️ Entity-Relationship (ER) Database Diagram
+## Entity-Relationship (ER) Database Diagram
 
 Relational PostgreSQL schema managed via Prisma ORM:
 
@@ -176,24 +176,24 @@ erDiagram
 
 ---
 
-## ✨ Key Engineering Features
+## Key Engineering Features
 
 ### 1. Header-Driven Idempotency Locks
 Prevents double-licensing and duplicate transaction processing when clients retry requests due to network drops. Uses Redis key locks with automatic database fallback.
 
 ### 2. Redis Sliding Window Rate Limiter
-Uses atomic Redis Sorted Sets (`ZADD`, `ZREMRANGEBYSCORE`, `ZCARD`) to implement a sliding window rate limiter. Protects audio stream endpoints against request bursts while eliminating boundary spikes inherent in fixed-window algorithms.
+Uses atomic Redis Sorted Sets (ZADD, ZREMRANGEBYSCORE, ZCARD) to implement a sliding window rate limiter. Protects audio stream endpoints against request bursts while eliminating boundary spikes inherent in fixed-window algorithms.
 
 ### 3. Playback Telemetry Collector
 Ingests real-time listener playback events (HEARTBEAT, BUFFERING, QUALITY_SHIFT) with automatic session state synchronization and Prometheus metrics incrementing.
 
-### 4. Operational Excellence (OE) & Telemetry
-* **Prometheus Metrics (`/metrics`):** Tracks HTTP request latencies, active stream sessions, license grant counts, and rate limit blocks.
-* **Health Probes (`/health/live`, `/health/ready`):** Kubernetes-compatible liveness and readiness probe endpoints.
+### 4. Operational Excellence (OE) and Telemetry
+* Prometheus Metrics (`/metrics`): Tracks HTTP request latencies, active stream sessions, license grant counts, and rate limit blocks.
+* Health Probes (`/health/live`, `/health/ready`): Kubernetes-compatible liveness and readiness probe endpoints.
 
 ---
 
-## 📡 API Reference & JSON Payloads
+## API Reference and JSON Payloads
 
 ### Grant Audio Stream License
 `POST /api/v1/licenses/grant`
@@ -232,23 +232,23 @@ Content-Type: application/json
 
 ---
 
-## 📐 Architectural Trade-Off Analysis
+## Architectural Trade-Off Analysis
 
 | Architectural Choice | Alternative Considered | Rationale & Selection Criteria |
 | :--- | :--- | :--- |
-| **Redis Sliding Window** | Fixed Window Counter | Fixed window counters allow $2\times$ burst capacity at window boundaries. Sliding window using Redis Sorted Sets provides smooth, deterministic rate control. |
+| **Redis Sliding Window** | Fixed Window Counter | Fixed window counters allow double burst capacity at window boundaries. Sliding window using Redis Sorted Sets provides smooth, deterministic rate control. |
 | **Prisma ORM + PostgreSQL** | Raw SQL Queries | Prisma provides type-safe queries, migration history, and connection pooling while avoiding manual SQL injection vulnerabilities. |
 | **Prometheus Exporter** | Custom Log Scraping | Prometheus pulls standard histogram buckets for p50/p90/p99 latency calculations with standard Grafana dashboard compatibility. |
 
 ---
 
-## 🛠️ Local Installation & Docker Setup
+## Local Installation and Docker Setup
 
 ### Prerequisites
 * Docker & Docker Compose
 * Node.js 20+
 
-### 1-Command Setup via Docker Compose
+### Setup via Docker Compose
 
 ```bash
 # Clone the repository
@@ -265,13 +265,13 @@ curl http://localhost:3000/health/ready
 
 ---
 
-## 🧪 Automated Test Suite
+## Automated Test Suite
 
 ```bash
 # Install local dependencies
 npm install
 
-# Run Jest unit & integration tests
+# Run Jest unit and integration tests
 npm test
 
 # Generate code coverage report
@@ -280,7 +280,7 @@ npm run test:coverage
 
 ---
 
-## 📄 License & Author
+## License and Author
 
-Developed by **Rahul Muddhapuram** ([rmuddhap@asu.edu](mailto:rmuddhap@asu.edu)).
+Developed by Rahul Muddhapuram (rmuddhap@asu.edu).  
 Licensed under the [MIT License](LICENSE).

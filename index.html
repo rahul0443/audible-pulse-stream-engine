@@ -29,11 +29,7 @@
       --font-code: 'JetBrains Mono', monospace;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg-dark);
@@ -47,81 +43,41 @@
       min-height: 100vh;
     }
 
-    /* Header & Navigation */
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 2rem;
-      border-bottom: 1px solid var(--border-color);
-      background: rgba(7, 11, 20, 0.8);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 2rem; border-bottom: 1px solid var(--border-color);
+      background: rgba(7, 11, 20, 0.8); backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
     .brand-icon {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 800; color: #070B14;
       box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
     }
+    .brand-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .brand-subtitle { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
 
-    .brand-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-subtitle {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .nav-badges {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
+    .nav-badges { display: flex; align-items: center; gap: 0.75rem; }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.35rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.35rem 0.75rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 600;
       border: 1px solid var(--border-color);
       background: rgba(255, 255, 255, 0.03);
     }
-
     .badge-live {
       color: var(--accent-emerald);
       border-color: rgba(16, 185, 129, 0.3);
       background: rgba(16, 185, 129, 0.1);
     }
-
     .badge-live::before {
-      content: '';
-      width: 6px;
-      height: 6px;
+      content: ''; width: 6px; height: 6px;
       background-color: var(--accent-emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-emerald);
+      border-radius: 50%; box-shadow: 0 0 8px var(--accent-emerald);
       animation: pulse 1.5s infinite;
     }
 
@@ -130,325 +86,124 @@
       50% { opacity: 0.4; transform: scale(0.8); }
     }
 
-    /* Layout Containers */
     main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
+      max-width: 1400px; margin: 0 auto; padding: 2rem;
+      display: flex; flex-direction: column; gap: 2rem;
     }
 
-    /* Hero Section */
     .hero-banner {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 2rem;
-      align-items: center;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 2rem;
-      backdrop-filter: blur(12px);
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 2rem; align-items: center;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 2rem; backdrop-filter: blur(12px);
     }
-
     .hero-text h1 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.5rem;
+      font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem;
       background: linear-gradient(135deg, #FFF, var(--text-muted));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-
-    .hero-text p {
-      color: var(--text-muted);
-      max-width: 750px;
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
+    .hero-text p { color: var(--text-muted); max-width: 750px; font-size: 0.95rem; line-height: 1.6; }
 
     .github-link-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
       padding: 0.75rem 1.25rem;
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
-      color: #000;
-      font-weight: 700;
-      font-size: 0.875rem;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: all 0.2s ease;
+      color: #000; font-weight: 700; font-size: 0.875rem;
+      border-radius: 8px; text-decoration: none; transition: all 0.2s ease;
       box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
     }
+    .github-link-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4); }
 
-    .github-link-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
-    }
-
-    /* Grid Layout for Simulator */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
     @media (max-width: 1024px) {
       .dashboard-grid { grid-template-columns: 1fr; }
       .hero-banner { grid-template-columns: 1fr; }
     }
 
-    /* Cards */
     .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1.5rem;
-      backdrop-filter: blur(12px);
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(12px);
+      display: flex; flex-direction: column; gap: 1.25rem;
       transition: border-color 0.2s ease;
     }
-
-    .card:hover {
-      border-color: var(--border-highlight);
-    }
-
+    .card:hover { border-color: var(--border-highlight); }
     .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;
     }
+    .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
 
-    .card-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .card-title-icon {
-      color: var(--accent-cyan);
-    }
-
-    /* Interactive Form Controls */
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .form-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
     .form-input, .form-select {
-      background: rgba(7, 11, 20, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 0.65rem 0.85rem;
-      color: var(--text-main);
-      font-family: var(--font-code);
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s ease;
+      background: rgba(7, 11, 20, 0.6); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 0.65rem 0.85rem; color: var(--text-main);
+      font-family: var(--font-code); font-size: 0.85rem; outline: none; transition: border-color 0.2s ease;
     }
+    .form-input:focus, .form-select:focus { border-color: var(--accent-cyan); }
 
-    .form-input:focus, .form-select:focus {
-      border-color: var(--accent-cyan);
-    }
-
-    .button-group {
-      display: flex;
-      gap: 0.75rem;
-    }
-
+    .button-group { display: flex; gap: 0.75rem; }
     .btn {
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      transition: all 0.2s ease;
+      padding: 0.65rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+      cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s ease;
     }
+    .btn-primary { background: var(--accent-cyan); color: #070B14; }
+    .btn-primary:hover { background: #7dd3fc; transform: translateY(-1px); }
+    .btn-danger { background: var(--accent-rose); color: #FFF; }
+    .btn-danger:hover { background: #fb7185; transform: translateY(-1px); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
 
-    .btn-primary {
-      background: var(--accent-cyan);
-      color: #070B14;
-    }
-
-    .btn-primary:hover {
-      background: #7dd3fc;
-      transform: translateY(-1px);
-    }
-
-    .btn-danger {
-      background: var(--accent-rose);
-      color: #FFF;
-    }
-
-    .btn-danger:hover {
-      background: #fb7185;
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    /* Live Output Monitor */
     .terminal-box {
-      background: #04060A;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 1rem;
-      font-family: var(--font-code);
-      font-size: 0.8rem;
-      max-height: 240px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
+      background: #04060A; border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 1rem; font-family: var(--font-code);
+      font-size: 0.8rem; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem;
     }
-
-    .terminal-line {
-      display: flex;
-      gap: 0.75rem;
-      word-break: break-all;
-    }
-
+    .terminal-line { display: flex; gap: 0.75rem; word-break: break-all; }
     .log-time { color: var(--text-muted); }
     .log-status-200 { color: var(--accent-emerald); font-weight: 600; }
     .log-status-429 { color: var(--accent-rose); font-weight: 600; }
     .log-status-201 { color: var(--accent-cyan); font-weight: 600; }
     .log-msg { color: #E2E8F0; }
 
-    /* Meter Bar */
-    .meter-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .meter-bar-bg {
-      height: 12px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      overflow: hidden;
-      position: relative;
-    }
-
+    .meter-container { display: flex; flex-direction: column; gap: 0.5rem; }
+    .meter-bar-bg { height: 12px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden; position: relative; }
     .meter-bar-fill {
-      height: 100%;
-      width: 0%;
+      height: 100%; width: 0%;
       background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
-      border-radius: 999px;
-      transition: width 0.3s ease, background-color 0.3s ease;
+      border-radius: 999px; transition: width 0.3s ease, background-color 0.3s ease;
     }
+    .meter-bar-fill.overflow { background: linear-gradient(90deg, var(--accent-amber), var(--accent-rose)); }
 
-    .meter-bar-fill.overflow {
-      background: linear-gradient(90deg, var(--accent-amber), var(--accent-rose));
-    }
-
-    /* Architecture Visualizer */
     .arch-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 1rem;
-      background: rgba(7, 11, 20, 0.4);
-      border-radius: 12px;
-      border: 1px dashed var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.5rem 1rem; background: rgba(7, 11, 20, 0.4);
+      border-radius: 12px; border: 1px dashed var(--border-color);
     }
-
     .arch-node {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.75rem 1rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 10px; font-size: 0.75rem; font-weight: 600; transition: all 0.3s ease;
     }
+    .arch-node.active { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); transform: scale(1.05); }
+    .arch-arrow { color: var(--text-muted); font-size: 1rem; }
 
-    .arch-node.active {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-      transform: scale(1.05);
-    }
-
-    .arch-arrow {
-      color: var(--text-muted);
-      font-size: 1rem;
-    }
-
-    /* Metrics Summary Cards */
-    .metrics-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-    }
-
-    @media (max-width: 768px) {
-      .metrics-summary-grid { grid-template-columns: repeat(2, 1fr); }
-    }
+    .metrics-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    @media (max-width: 768px) { .metrics-summary-grid { grid-template-columns: repeat(2, 1fr); } }
 
     .stat-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.25rem;
     }
-
-    .stat-number {
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-    }
+    .stat-number { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
   <header>
     <div class="brand">
-      <div class="brand-icon">🎧</div>
+      <div class="brand-icon">AP</div>
       <div>
         <div class="brand-title">Audible Pulse Stream Engine</div>
         <div class="brand-subtitle">Distributed Stream Licensing & Rate Limiting System</div>
@@ -465,7 +220,6 @@
 
   <main>
 
-    <!-- Hero Banner -->
     <div class="hero-banner">
       <div class="hero-text">
         <h1>High-Throughput Audio Telemetry & Entitlement Gateway</h1>
@@ -474,11 +228,10 @@
         </p>
       </div>
       <div class="badge" style="padding: 0.75rem 1.25rem; font-size: 0.85rem; border-color: var(--accent-cyan);">
-        ⚡ Latency: &lt;12ms p99
+        Latency: &lt;12ms p99
       </div>
     </div>
 
-    <!-- Live Telemetry KPI Metrics Cards -->
     <div class="metrics-summary-grid">
       <div class="stat-box">
         <div class="stat-number" id="stat-req-total" style="color: var(--accent-cyan);">1,428</div>
@@ -498,51 +251,44 @@
       </div>
     </div>
 
-    <!-- Interactive Topology Diagram -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">
-          <span class="card-title-icon">🌐</span> Interactive System Node Topology
-        </div>
+        <div class="card-title">Interactive System Node Topology</div>
         <div class="badge" style="color: var(--accent-cyan);">Real-Time Data Pipeline</div>
       </div>
       <div class="arch-container">
         <div class="arch-node" id="node-client">
-          <div>📱 Client SDK</div>
+          <div>Client SDK</div>
           <div style="font-size: 0.65rem; color: var(--text-muted);">Audio Player</div>
         </div>
         <div class="arch-arrow">➔</div>
         <div class="arch-node" id="node-gateway">
-          <div>🛡️ API Gateway</div>
+          <div>API Gateway</div>
           <div style="font-size: 0.65rem; color: var(--text-muted);">Express / Helmet</div>
         </div>
         <div class="arch-arrow">➔</div>
         <div class="arch-node" id="node-ratelimit">
-          <div>⚡ Redis Sliding Window</div>
+          <div>Redis Sliding Window</div>
           <div style="font-size: 0.65rem; color: var(--text-muted);">Rate Limiter</div>
         </div>
         <div class="arch-arrow">➔</div>
         <div class="arch-node" id="node-service">
-          <div>⚙️ Entitlement Svc</div>
+          <div>Entitlement Svc</div>
           <div style="font-size: 0.65rem; color: var(--text-muted);">Idempotency Lock</div>
         </div>
         <div class="arch-arrow">➔</div>
         <div class="arch-node" id="node-db">
-          <div>🛢️ PostgreSQL</div>
+          <div>PostgreSQL</div>
           <div style="font-size: 0.65rem; color: var(--text-muted);">Prisma ORM</div>
         </div>
       </div>
     </div>
 
-    <!-- Dashboard Main Interactive Grid -->
     <div class="dashboard-grid">
 
-      <!-- Module 1: Idempotent Stream Licensing Sandbox -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <span class="card-title-icon">🔐</span> Idempotent Stream License Granting
-          </div>
+          <div class="card-title">Idempotent Stream License Granting</div>
           <span class="badge" style="color: var(--accent-emerald);">POST /api/v1/licenses/grant</span>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-muted);">
@@ -569,12 +315,9 @@
         </div>
       </div>
 
-      <!-- Module 2: Redis Sliding Window Rate Limiter Simulator -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            <span class="card-title-icon">⚡</span> Redis Sliding Window Rate Limiter
-          </div>
+          <div class="card-title">Redis Sliding Window Rate Limiter</div>
           <span class="badge" style="color: var(--accent-rose);">Quota: 100 reqs / 60s</span>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-muted);">
@@ -600,12 +343,9 @@
 
     </div>
 
-    <!-- Live Execution & Telemetry Terminal Logs -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">
-          <span class="card-title-icon">💻</span> Real-Time System Event Log & Telemetry Monitor
-        </div>
+        <div class="card-title">Real-Time System Event Log & Telemetry Monitor</div>
         <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="clearLogs()">Clear Console</button>
       </div>
       <div class="terminal-box" id="terminal">
@@ -617,12 +357,9 @@
       </div>
     </div>
 
-    <!-- Live Chart.js Metrics -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">
-          <span class="card-title-icon">📊</span> Prometheus Live Metrics Telemetry Chart
-        </div>
+        <div class="card-title">Prometheus Live Metrics Telemetry Chart</div>
         <span class="badge" style="color: var(--accent-cyan);">GET /metrics</span>
       </div>
       <div style="height: 260px;">
@@ -640,7 +377,6 @@
     let totalRateBlocked = 12;
     let totalIdempotentReplays = 45;
 
-    // Terminal Logging
     function logEvent(status, code, message) {
       const terminal = document.getElementById('terminal');
       const timeStr = new Date().toLocaleTimeString();
@@ -670,7 +406,6 @@
       });
     }
 
-    // License Simulation
     function simulateLicenseGrant(isRetry) {
       totalEvaluated++;
       const userTier = document.getElementById('user-tier').value;
@@ -687,7 +422,6 @@
       updateStats();
     }
 
-    // Rate Limiter Simulation
     function updateMeter() {
       const pct = Math.min(100, (reqCount / maxReqs) * 100);
       const fill = document.getElementById('meter-fill');
@@ -734,7 +468,6 @@
       document.getElementById('stat-idempotent-replays').innerText = totalIdempotentReplays.toLocaleString();
     }
 
-    // Initialize Chart.js
     const ctx = document.getElementById('metricsChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'line',
