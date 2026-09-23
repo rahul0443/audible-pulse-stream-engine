@@ -60,6 +60,10 @@ jobs:
         run: npm ci || npm install
       - name: Generate Prisma Client
         run: npx prisma generate
+      - name: Push Prisma Schema to Test Database
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/audible_pulse_test"
+        run: npx prisma db push --skip-generate
       - name: Run Test Suite
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/audible_pulse_test"

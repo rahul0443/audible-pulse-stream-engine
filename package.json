@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "jest --detectOpenHandles --forceExit",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --coverage --forceExit",
     "lint": "eslint 'src/**/*.ts'",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"

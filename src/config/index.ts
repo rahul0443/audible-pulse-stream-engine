@@ -10,4 +10,5 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'audible-pulse-secret-key-change-in-prod',
   rateLimitWindowSeconds: parseInt(process.env.RATE_LIMIT_WINDOW_SEC || '60', 10),
   rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQ || '100', 10),
+  idempotencyTtlSeconds: parseInt(process.env.IDEMPOTENCY_TTL_SEC || '86400', 10),
 };

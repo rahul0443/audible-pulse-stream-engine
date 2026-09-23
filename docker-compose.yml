@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+  # One-off job that creates the schema in the postgres service below via
+  # `prisma db push` before `app` starts. Uses the `builder` stage because it
+  # has the Prisma CLI (a devDependency, stripped from the slim runtime image).
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/audible_pulse
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["npx", "prisma", "db", "push", "--skip-generate", "--accept-data-loss"]
+
   app:
     build:
       context: .
@@ -19,6 +34,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   postgres:
     image: postgres:15-alpine

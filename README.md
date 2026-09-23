@@ -181,7 +181,7 @@ erDiagram
 ## Key Engineering Features
 
 ### 1. Header-Driven Idempotency Locks
-Prevents double-licensing and duplicate transaction processing when clients retry requests due to network drops. Uses Redis key locks with automatic database fallback.
+Prevents double-licensing when clients retry a request after a network drop. An atomic `SET key value NX EX <ttl>` against Redis is the fast-path cache (falls back to an in-memory store with the same TTL semantics if Redis is unreachable), and the `idempotencyKey` column's unique constraint on `license_grants` is the actual correctness guarantee underneath both -- so a duplicate is still caught even if the cache layer misses or expires, just via a slower DB round-trip instead of an instant replay.
 
 ### 2. Redis Sliding Window Rate Limiter
 Uses atomic Redis Sorted Sets (ZADD, ZREMRANGEBYSCORE, ZCARD) to implement a sliding window rate limiter. Protects audio stream endpoints against request bursts while eliminating boundary spikes inherent in fixed-window algorithms.
@@ -269,14 +269,24 @@ curl http://localhost:3000/health/ready
 
 ## Automated Test Suite
 
+The integration tests hit a real Postgres (there's no DB mock -- `LicenseRepository` calls will fail without one) and use a real Redis if reachable, falling back to the in-memory store otherwise.
+
 ```bash
 # Install local dependencies
 npm install
 
-# Run Jest unit and integration tests
+# Point at a real Postgres + push the schema (no migrations are checked in, this
+# project uses `prisma db push` -- see docker-compose.yml's `migrate` service for
+# how this happens automatically under Docker Compose)
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/audible_pulse_test"
+npx prisma db push
+
+# Run Jest unit and integration tests (9 tests as of this writing)
 npm test
 
-# Generate code coverage report
+# Generate code coverage report (~84% statements, ~69% branches with a real
+# Postgres+Redis available; see jest.config.js for why the enforced branch
+# threshold is currently 65%, not higher)
 npm run test:coverage
 ```
 

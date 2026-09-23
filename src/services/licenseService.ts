@@ -23,20 +23,17 @@ export class LicenseService {
     // Expiration date: 24 hours from grant time
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+    // Auto-provision the referenced user/audiobook if this is the first time either
+    // ID has been seen (see LicenseRepository.ensureUser/ensureAudiobook).
+    await this.repo.ensureUser(userId);
+    await this.repo.ensureAudiobook(audiobookId);
+
     const newLicense = await this.repo.createLicense({
       userId,
       audiobookId,
       idempotencyKey,
       expiresAt,
-    }).catch(() => ({
-      id: `lic-${Date.now()}`,
-      userId,
-      audiobookId,
-      idempotencyKey,
-      status: 'GRANTED',
-      grantedAt: new Date(),
-      expiresAt,
-    }));
+    });
 
     licenseGrantCounter.inc({ tier: 'PREMIUM', status: 'SUCCESS' });
     return { license: newLicense, isReplay: false };

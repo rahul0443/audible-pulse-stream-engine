@@ -18,6 +18,13 @@ try {
   redis.on('error', (err) => {
     logger.warn(`Redis connection warning: ${err.message}. Falling back to in-memory rate limiter.`);
   });
+
+  // `lazyConnect: true` means the client stays in status "wait" -- never "ready" --
+  // until something actually calls .connect(). Since the request path below only
+  // issues Redis commands when status is already "ready", nothing would ever
+  // trigger that first connection: kick it off here instead. Errors are handled by
+  // the 'error' listener above; this is intentionally not awaited.
+  redis.connect().catch(() => {});
 } catch (e) {
   logger.warn('Redis client failed to initialize, using in-memory rate limiter.');
 }
