@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LicenseStatus {
+  GRANTED
+  EXPIRED
+  REVOKED
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  TERMINATED
+}
+
+model User {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String
+  subscriptionTier String            @default("PREMIUM") // BASIC, PREMIUM, ENTERPRISE
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  licenses         LicenseGrant[]
+  sessions         PlaybackSession[]
+
+  @@map("users")
+}
+
+model Audiobook {
+  id              String            @id @default(uuid())
+  title           String
+  author          String
+  durationSeconds Int
+  streamUrl       String
+  bitrateKbps     Int               @default(256)
+  createdAt       DateTime          @default(now())
+  licenses        LicenseGrant[]
+  sessions        PlaybackSession[]
+
+  @@map("audiobooks")
+}
+
+model LicenseGrant {
+  id             String        @id @default(uuid())
+  userId         String
+  audiobookId    String
+  idempotencyKey String        @unique
+  status         LicenseStatus @default(GRANTED)
+  grantedAt      DateTime      @default(now())
+  expiresAt      DateTime
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audiobook Audiobook @relation(fields: [audiobookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, audiobookId])
+  @@map("license_grants")
+}
+
+model PlaybackSession {
+  id                     String           @id @default(uuid())
+  userId                 String
+  audiobookId            String
+  currentPositionSeconds Int              @default(0)
+  status                 SessionStatus    @default(ACTIVE)
+  startedAt              DateTime         @default(now())
+  lastActiveAt           DateTime         @updatedAt
+  telemetryEvents        TelemetryEvent[]
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audiobook Audiobook @relation(fields: [audiobookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("playback_sessions")
+}
+
+model TelemetryEvent {
+  id              String   @id @default(uuid())
+  sessionId       String
+  eventType       String   // HEARTBEAT, BUFFERING, ERROR, QUALITY_SHIFT
+  bufferingMs     Int      @default(0)
+  bitrateKbps     Int      @default(256)
+  playbackPosition Int
+  timestamp       DateTime @default(now())
+
+  session PlaybackSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, timestamp])
+  @@map("telemetry_events")
+}
+
+model DeadLetterQueue {
+  id           String   @id @default(uuid())
+  payloadJson  String
+  errorMessage String
+  retryCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@map("dead_letter_queue")
+}

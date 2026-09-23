@@ -1,0 +1,80 @@
+name: Audible Pulse Stream Engine CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & TypeCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'audible-pulse-stream-engine/package-lock.json'
+      - name: Install Dependencies
+        run: npm ci || npm install
+      - name: Run TypeScript Compiler Check
+        run: npx tsc --noEmit
+
+  test-suite:
+    name: Automated Unit & Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: audible_pulse_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm ci || npm install
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      - name: Run Test Suite
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/audible_pulse_test"
+          REDIS_HOST: "localhost"
+          REDIS_PORT: 6379
+          JWT_SECRET: "ci-cd-test-secret"
+        run: npm test
+
+  docker-build:
+    name: Container Build & Verification
+    needs: [lint-and-typecheck, test-suite]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: docker build -t audible-pulse-stream-engine:latest .
+      - name: Verify Docker Container Build
+        run: docker images | grep audible-pulse-stream-engine
